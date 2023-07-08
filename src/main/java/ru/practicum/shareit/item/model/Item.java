@@ -5,9 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ru.practicum.shareit.user.model.User;
 
-/**
- * TODO Sprint add-controllers.
- */
+
 @Getter
 @Setter
 @Builder
