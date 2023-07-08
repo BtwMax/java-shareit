@@ -41,8 +41,8 @@ public class ItemRepositoryImpl implements ItemRepository {
             throw new NotFoundException("Невозможно обновить несуществующий предмет");
         }
         Item oldItem = getItemById(item.getId());
-        long ownerId = oldItem.getOwner();
-        if (ownerId != item.getOwner()) {
+        long ownerId = oldItem.getOwner().getId();
+        if (ownerId != item.getOwner().getId()) {
             throw new NotFoundException("У пользователя с id = " + item.getOwner() + " нет такого предмета");
         }
         if (item.getName() == null) {
@@ -62,15 +62,12 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public Collection<Item> getUserItems(long id) {
         return items.values().stream()
-                .filter(item -> item.getOwner() == id)
+                .filter(item -> item.getOwner().getId() == id)
                 .collect(Collectors.toSet());
     }
 
     @Override
     public Collection<Item> findItemsByText(String text) {
-        if (text == null || text.isBlank()) {
-            return new ArrayList<>();
-        }
         return items.values().stream()
                 .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase()) ||
                         item.getDescription().toLowerCase().contains(text.toLowerCase()) && item.getAvailable())

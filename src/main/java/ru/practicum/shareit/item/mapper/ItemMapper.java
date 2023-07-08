@@ -1,17 +1,20 @@
 package ru.practicum.shareit.item.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
+@UtilityClass
 public class ItemMapper {
 
-    public static Item toItem(long id, long userId, ItemDto itemDto) {
+    public Item toItem(long id, User user, ItemDto itemDto) {
         return Item.builder()
                 .id(id)
                 .name(itemDto.getName())
                 .description(itemDto.getDescription())
                 .available(itemDto.getAvailable())
-                .owner(userId)
+                .owner(user)
                 .build();
     }
 
