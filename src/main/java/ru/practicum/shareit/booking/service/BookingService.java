@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.IncomingBookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -40,6 +41,7 @@ public class BookingService {
         this.itemRepository = itemRepository;
     }
 
+    @Transactional
     public BookingDto addBooking(long bookerId, IncomingBookingDto incomingBookingDto) {
         User user = userRepository.findById(bookerId);
         if (user == null) {
@@ -69,6 +71,7 @@ public class BookingService {
         return BookingMapper.toBookingDto(bookingStorage, ItemMapper.toItemDto(item), UserMapper.toShortUserDto(user));
     }
 
+    @Transactional
     public BookingDto changeApproveStatus(long ownerId, long bookingId, boolean approved) {
         User user = userRepository.findById(ownerId);
         if (user == null) {
@@ -99,6 +102,7 @@ public class BookingService {
                 UserMapper.toShortUserDto(booker));
     }
 
+    @Transactional(readOnly = true)
     public BookingDto getBookingById(long userId, long bookingId) {
         Booking booking = bookingRepository.findById(bookingId);
         if (booking == null) {
@@ -115,6 +119,7 @@ public class BookingService {
         return BookingMapper.toBookingDto(booking, ItemMapper.toItemDto(item), UserMapper.toShortUserDto(booking.getBooker()));
     }
 
+    @Transactional(readOnly = true)
     public List<BookingDto> getBookingByBooker(long bookerId, String state) {
         User user = userRepository.findById(bookerId);
         if (user == null) {
@@ -150,6 +155,7 @@ public class BookingService {
         return toListBookingDto(bookings);
     }
 
+   @Transactional(readOnly = true)
     public List<BookingDto> getBookingByOwner(long ownerId, String state) {
         User user = userRepository.findById(ownerId);
         if (user == null) {

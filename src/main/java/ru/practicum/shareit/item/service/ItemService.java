@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -45,6 +46,7 @@ public class ItemService {
         this.commentRepository = commentRepository;
     }
 
+    @Transactional
     public ItemDto addItem(long userId, ItemDto itemDto) {
         Item item = ItemMapper.toItem(userRepository.findById(userId), itemDto);
         validate(item);
@@ -55,6 +57,7 @@ public class ItemService {
         return ItemMapper.toItemDto(itemStorage);
     }
 
+    @Transactional(readOnly = true)
     public ItemFullDto getItemById(long userId, long itemId) {
         User user = userRepository.findById(userId);
         if (user == null) {
@@ -75,6 +78,7 @@ public class ItemService {
         return itemFullDto;
     }
 
+    @Transactional
     public ItemDto updateItem(long userId, ItemDto itemDto, long id) {
         User user = userRepository.findById(userId);
         if (user == null) {
@@ -103,6 +107,7 @@ public class ItemService {
         return ItemMapper.toItemDto(itemStorage);
     }
 
+    @Transactional(readOnly = true)
     public Collection<ItemFullDto> getUserItems(long id) {
         User user = userRepository.findById(id);
         if (user == null) {
@@ -115,6 +120,7 @@ public class ItemService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Collection<ItemDto> findItemsByText(String text) {
         return itemRepository.findItemsByNameOrDescriptionContainingIgnoreCase(text, text).stream()
                 .filter(Item::getAvailable)
@@ -122,6 +128,7 @@ public class ItemService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public OutCommentDto addComment(long userId, long itemId, IncomingCommentDto incomingCommentDto) {
         if (incomingCommentDto.getText().isEmpty()) {
             throw new ValidationException("Нельзя оставить пустой комментарий");
