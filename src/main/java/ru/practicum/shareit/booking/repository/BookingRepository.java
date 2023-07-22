@@ -62,7 +62,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query(value = "SELECT b.* " +
             "FROM booking AS b " +
-            "WHERE b.item_id = ?1 AND ?2 < b.start_time AND b.status = 'APPROVED' "+
+            "WHERE b.item_id = ?1 AND ?2 < b.start_time AND b.status = 'APPROVED' " +
             "ORDER BY b.start_time " +
             "LIMIT 1", nativeQuery = true)
     Optional<Booking> findItemNextBooking(long id, LocalDateTime dateTime);

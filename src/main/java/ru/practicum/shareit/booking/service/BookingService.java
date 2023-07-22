@@ -25,9 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.booking.model.State.CURRENT;
-import static ru.practicum.shareit.booking.model.State.PAST;
-
 @Service
 public class BookingService {
 
@@ -188,7 +185,7 @@ public class BookingService {
         return toListBookingDto(bookings);
     }
 
-    private List<BookingDto> toListBookingDto (List<Booking> bookings) {
+    private List<BookingDto> toListBookingDto(List<Booking> bookings) {
         return bookings.stream()
                 .map(booking -> BookingMapper.toBookingDto(
                         booking,
