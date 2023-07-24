@@ -15,13 +15,13 @@ import ru.practicum.shareit.user.model.User;
 public class BookingMapper {
 
     public Booking toBooking(IncomingBookingDto incomingBookingDto, Item item, User user, Status status) {
-        Booking booking = new Booking();
-        booking.setStart(incomingBookingDto.getStart());
-        booking.setEnd(incomingBookingDto.getEnd());
-        booking.setItem(item);
-        booking.setBooker(user);
-        booking.setStatus(status);
-        return booking;
+        return Booking.builder()
+                .start(incomingBookingDto.getStart())
+                .end(incomingBookingDto.getEnd())
+                .item(item)
+                .booker(user)
+                .status(status)
+                .build();
     }
 
     public BookingDto toBookingDto(Booking booking, ItemDto itemDto, ShortUserDto userDto) {

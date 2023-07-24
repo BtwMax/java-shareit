@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.IncomingBookingDto;
+import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exceptions.ServerErrorException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -46,13 +48,17 @@ public class BookingController {
     public List<BookingDto> getBookingForBooker(@RequestHeader("X-Sharer-User-Id") long bookerId,
                                                 @RequestParam(defaultValue = "ALL") String state) {
         log.info("Запрос на вывод бронирований для арендатора");
-        return bookingService.getBookingByBooker(bookerId, state);
+        State bookingState = State.from(state)
+                .orElseThrow(() -> new ServerErrorException("Unknown state: " + state));
+        return bookingService.getBookingByBooker(bookerId, bookingState);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getBookingForOwner(@RequestHeader("X-Sharer-User-Id") long ownerId,
                                                @RequestParam(defaultValue = "ALL") String state) {
         log.info("Запрос на вывод бронирований для арендодателя");
-        return bookingService.getBookingByOwner(ownerId, state);
+        State bookingState = State.from(state)
+                .orElseThrow(() -> new ServerErrorException("Unknown state: " + state));
+        return bookingService.getBookingByOwner(ownerId, bookingState);
     }
 }

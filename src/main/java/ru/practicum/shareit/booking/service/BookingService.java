@@ -120,73 +120,65 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public List<BookingDto> getBookingByBooker(long bookerId, String state) {
+    public List<BookingDto> getBookingByBooker(long bookerId, State state) {
         User user = userRepository.findById(bookerId);
         if (user == null) {
             throw new NotFoundException("Пользователь с id = " + bookerId + " не найден");
         }
         List<Booking> bookings = new ArrayList<>();
 
-        try {
-            switch (State.valueOf(state)) {
-                case ALL:
-                    bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(bookerId);
-                    break;
-                case CURRENT:
-                    bookings = bookingRepository.findAllByBookerCurrent(bookerId, LocalDateTime.now());
-                    break;
-                case PAST:
-                    bookings = bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(bookerId, LocalDateTime.now());
-                    break;
-                case FUTURE:
-                    bookings = bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(bookerId, LocalDateTime.now());
-                    break;
-                case WAITING:
-                    bookings = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(bookerId, Status.WAITING);
-                    break;
-                case REJECTED:
-                    bookings = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(bookerId, Status.REJECTED);
-                    break;
+        switch (state) {
+            case ALL:
+                bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(bookerId);
+                break;
+            case CURRENT:
+                bookings = bookingRepository.findAllByBookerCurrent(bookerId, LocalDateTime.now());
+                break;
+            case PAST:
+                bookings = bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(bookerId, LocalDateTime.now());
+                break;
+            case FUTURE:
+                bookings = bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(bookerId, LocalDateTime.now());
+                break;
+            case WAITING:
+                bookings = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(bookerId, Status.WAITING);
+                break;
+            case REJECTED:
+                bookings = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(bookerId, Status.REJECTED);
+                break;
 
-            }
-        } catch (IllegalArgumentException e) {
-            throw new ServerErrorException("Unknown state: " + state);
         }
         return toListBookingDto(bookings);
     }
 
-   @Transactional(readOnly = true)
-    public List<BookingDto> getBookingByOwner(long ownerId, String state) {
+    @Transactional(readOnly = true)
+    public List<BookingDto> getBookingByOwner(long ownerId, State state) {
         User user = userRepository.findById(ownerId);
         if (user == null) {
             throw new NotFoundException("Пользователь с id = " + ownerId + " не найден");
         }
         List<Booking> bookings = new ArrayList<>();
 
-        try {
-            switch (State.valueOf(state)) {
-                case ALL:
-                    bookings = bookingRepository.findAllBookingByOwner(ownerId);
-                    break;
-                case CURRENT:
-                    bookings = bookingRepository.findCurrentBookingByOwner(ownerId, LocalDateTime.now());
-                    break;
-                case PAST:
-                    bookings = bookingRepository.findPastBookingByOwner(ownerId, LocalDateTime.now());
-                    break;
-                case FUTURE:
-                    bookings = bookingRepository.findFutureBookingByOwner(ownerId, LocalDateTime.now());
-                    break;
-                case WAITING:
-                    bookings = bookingRepository.findBookingByOwnerIdAndStatus(ownerId, Status.WAITING);
-                    break;
-                case REJECTED:
-                    bookings = bookingRepository.findBookingByOwnerIdAndStatus(ownerId, Status.REJECTED);
-                    break;
+        switch (state) {
+            case ALL:
+                bookings = bookingRepository.findAllBookingByOwner(ownerId);
+                break;
+            case CURRENT:
+                bookings = bookingRepository.findCurrentBookingByOwner(ownerId, LocalDateTime.now());
+                break;
+            case PAST:
+                bookings = bookingRepository.findPastBookingByOwner(ownerId, LocalDateTime.now());
+                break;
+            case FUTURE:
+                bookings = bookingRepository.findFutureBookingByOwner(ownerId, LocalDateTime.now());
+                break;
+            case WAITING:
+                bookings = bookingRepository.findBookingByOwnerIdAndStatus(ownerId, Status.WAITING);
+                break;
+            case REJECTED:
+                bookings = bookingRepository.findBookingByOwnerIdAndStatus(ownerId, Status.REJECTED);
+                break;
 
-            }
-        } catch (IllegalArgumentException e) {
-            throw new ServerErrorException("Unknown state: " + state);
         }
         return toListBookingDto(bookings);
     }

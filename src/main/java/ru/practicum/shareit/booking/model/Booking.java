@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -10,6 +9,9 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "booking")
 public class Booking {
@@ -32,10 +34,8 @@ public class Booking {
     @JoinColumn(name = "booker")
     private User booker;
 
-    @Column(name = "status")
+    @Column
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    public Booking() {
-    }
 }
