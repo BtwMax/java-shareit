@@ -29,4 +29,18 @@ public class ExceptionHandler {
         log.info("400: {}", e.getMessage());
         return new ErrorResponse(String.format("Ошибка с полем \"%s\".", e.getMessage()));
     }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleAvailableException(final AvailableException e) {
+        log.info("400: {}", e.getMessage());
+        return new ErrorResponse(String.format("Ошибка с полем \"%s\".", e.getMessage()));
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleServerErrorException(final ServerErrorException e) {
+        log.info("500: {}", e.getMessage());
+        return new ErrorResponse(String.format(e.getMessage()));
+    }
 }
