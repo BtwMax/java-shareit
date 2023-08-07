@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
@@ -51,7 +52,6 @@ public class UserService {
         return UserMapper.toUserDto(userStorage);
     }
 
-    @Transactional(readOnly = true)
     public UserDto getUserById(long id) {
         User user = userRepository.findById(id);
         if (user == null) {
@@ -65,7 +65,6 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(UserMapper::toUserDto)

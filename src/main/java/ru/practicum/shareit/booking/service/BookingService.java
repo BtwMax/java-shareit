@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class BookingService {
 
     private final BookingRepository bookingRepository;
@@ -100,7 +101,6 @@ public class BookingService {
                 UserMapper.toShortUserDto(booker));
     }
 
-    @Transactional(readOnly = true)
     public BookingDto getBookingById(long userId, long bookingId) {
         Booking booking = bookingRepository.findById(bookingId);
         if (booking == null) {
@@ -117,7 +117,6 @@ public class BookingService {
         return BookingMapper.toBookingDto(booking, ItemMapper.toItemDto(item), UserMapper.toShortUserDto(booking.getBooker()));
     }
 
-    @Transactional(readOnly = true)
     public List<BookingDto> getBookingByBooker(long bookerId, State state, Integer from, Integer size) {
         User user = userRepository.findById(bookerId);
         if (user == null) {
@@ -135,7 +134,6 @@ public class BookingService {
         return toListBookingDto(bookings);
     }
 
-    @Transactional(readOnly = true)
     public List<BookingDto> getBookingByOwner(long ownerId, State state, Integer from, Integer size) {
         User user = userRepository.findById(ownerId);
         if (user == null) {

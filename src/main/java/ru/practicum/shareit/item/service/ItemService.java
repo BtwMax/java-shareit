@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class ItemService {
 
     private final ItemRepository itemRepository;
@@ -66,7 +67,6 @@ public class ItemService {
         return ItemMapper.toItemDto(itemStorage);
     }
 
-    @Transactional(readOnly = true)
     public ItemFullDto getItemById(long userId, long itemId) {
         User user = userRepository.findById(userId);
         if (user == null) {
@@ -117,7 +117,6 @@ public class ItemService {
         return ItemMapper.toItemDto(itemStorage);
     }
 
-    @Transactional(readOnly = true)
     public Collection<ItemFullDto> getUserItems(long id) {
         User user = userRepository.findById(id);
         if (user == null) {
@@ -130,7 +129,6 @@ public class ItemService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
     public List<ItemDto> findItemsByText(String text) {
         return itemRepository.findItemsByNameOrDescriptionContainingIgnoreCase(text, text).stream()
                 .filter(Item::getAvailable)

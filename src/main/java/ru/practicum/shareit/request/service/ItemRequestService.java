@@ -9,6 +9,7 @@ import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.IncomingItemRequestDto;
 import ru.practicum.shareit.request.dto.OutItemRequestDto;
@@ -21,9 +22,14 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+
 @Service
+@Transactional(readOnly = true)
 public class ItemRequestService {
 
     private final ItemRequestRepository requestRepository;
@@ -50,7 +56,6 @@ public class ItemRequestService {
         return ItemRequestMapper.toOutItemRequestDto(itemRequestStorage);
     }
 
-    @Transactional(readOnly = true)
     public OutLongItemRequestDto getItemRequestById(long requestorId, long requestId) {
         User user = userRepository.findById(requestorId);
         if (user == null) {
@@ -62,25 +67,29 @@ public class ItemRequestService {
         }
         List<ItemDto> items = itemRepository.findItemsByItemRequestId(requestId).stream()
                 .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+                .collect(toList());
         return ItemRequestMapper.toOutLongItemRequestDto(itemRequest, items);
     }
 
-    @Transactional(readOnly = true)
     public List<OutLongItemRequestDto> getRequestorItemRequest(long requestorId) {
         User user = userRepository.findById(requestorId);
         if (user == null) {
             throw new NotFoundException("Пользователь с id = " + requestorId + " не найден");
         }
-        return requestRepository.findItemRequestByRequestorIdOrderByCreatedDesc(requestorId).stream()
-                .map(itemRequest -> ItemRequestMapper.toOutLongItemRequestDto(itemRequest,
-                        itemRepository.findItemsByItemRequestId(itemRequest.getId()).stream()
-                                .map(ItemMapper::toItemDto)
-                                .collect(Collectors.toList())))
-                .collect(Collectors.toList());
+        List<ItemRequest> itemRequests = requestRepository.findItemRequestByRequestorIdOrderByCreatedDesc(requestorId);
+
+        /*Вроде бы так получается без лишнего n + 1 к базе данных*/
+        return itemRequests.stream()
+                .map(itemRequest -> {
+                    List<Item> items = itemRepository.findItemsByItemRequestId(itemRequest.getId());
+                    List<ItemDto> itemDtos = items.stream()
+                            .map(ItemMapper::toItemDto)
+                            .collect(toList());
+                    return ItemRequestMapper.toOutLongItemRequestDto(itemRequest, itemDtos);
+                })
+                .collect(toList());
     }
 
-    @Transactional(readOnly = true)
     public List<OutLongItemRequestDto> getAllOtherItemRequest(long requestorId, Integer from, Integer size) {
         User user = userRepository.findById(requestorId);
         if (user == null) {
@@ -100,7 +109,7 @@ public class ItemRequestService {
                 .map(itemRequest -> ItemRequestMapper.toOutLongItemRequestDto(itemRequest,
                         itemRepository.findItemsByItemRequestId(itemRequest.getId()).stream()
                                 .map(ItemMapper::toItemDto)
-                                .collect(Collectors.toList())))
-                .collect(Collectors.toList());
+                                .collect(toList())))
+                .collect(toList());
     }
 }
