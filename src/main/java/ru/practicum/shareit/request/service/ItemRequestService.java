@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -37,6 +38,7 @@ public class ItemRequestService {
         this.itemRepository = itemRepository;
     }
 
+    @Transactional
     public OutItemRequestDto addItemRequest(IncomingItemRequestDto itemRequestDto, long requestorId) {
         User user = userRepository.findById(requestorId);
         if (user == null) {
@@ -48,6 +50,7 @@ public class ItemRequestService {
         return ItemRequestMapper.toOutItemRequestDto(itemRequestStorage);
     }
 
+    @Transactional(readOnly = true)
     public OutLongItemRequestDto getItemRequestById(long requestorId, long requestId) {
         User user = userRepository.findById(requestorId);
         if (user == null) {
@@ -63,6 +66,7 @@ public class ItemRequestService {
         return ItemRequestMapper.toOutLongItemRequestDto(itemRequest, items);
     }
 
+    @Transactional(readOnly = true)
     public List<OutLongItemRequestDto> getRequestorItemRequest(long requestorId) {
         User user = userRepository.findById(requestorId);
         if (user == null) {
@@ -76,6 +80,7 @@ public class ItemRequestService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<OutLongItemRequestDto> getAllOtherItemRequest(long requestorId, Integer from, Integer size) {
         User user = userRepository.findById(requestorId);
         if (user == null) {
