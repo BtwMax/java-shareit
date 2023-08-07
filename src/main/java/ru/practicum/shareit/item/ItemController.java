@@ -12,6 +12,7 @@ import ru.practicum.shareit.item.service.ItemService;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 
 @RestController
@@ -52,7 +53,7 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> getItemsByText(@RequestParam String text) {
+    public List<ItemDto> getItemsByText(@RequestParam String text) {
         log.info("Запрос на поиск предметов по тексту в названии или описании");
         if (text == null || text.isBlank()) {
             return new ArrayList<>();

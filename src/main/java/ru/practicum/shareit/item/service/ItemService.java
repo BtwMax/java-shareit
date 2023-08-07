@@ -19,6 +19,8 @@ import ru.practicum.shareit.item.dto.ItemFullDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -36,19 +38,26 @@ public class ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Autowired
     public ItemService(ItemRepository itemRepository, UserRepository userRepository,
-                       BookingRepository bookingRepository, CommentRepository commentRepository) {
+                       BookingRepository bookingRepository, CommentRepository commentRepository,
+                       ItemRequestRepository itemRequestRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     @Transactional
     public ItemDto addItem(long userId, ItemDto itemDto) {
         Item item = ItemMapper.toItem(userRepository.findById(userId), itemDto);
+        if (itemDto.getRequestId() != null) {
+            ItemRequest itemRequest = itemRequestRepository.getReferenceById(itemDto.getRequestId());
+            item.setItemRequest(itemRequest);
+        }
         validate(item);
         if (userRepository.findById(userId) == null) {
             throw new NotFoundException("Пользователь с id = " + userId + " не найден");
@@ -82,13 +91,14 @@ public class ItemService {
     public ItemDto updateItem(long userId, ItemDto itemDto, long id) {
         User user = userRepository.findById(userId);
         if (user == null) {
-            throw new NotFoundException("Нельзя добавить предмет к несуществующему пользователю");
+            throw new NotFoundException("Нельзя обновить предмет у несуществующего пользователя");
         }
         Item item = ItemMapper.toItem(userRepository.findById(userId), itemDto);
-        if (item == null) {
+        Item itemIsExist = itemRepository.findById(id);
+        if (itemIsExist == null) {
             throw new NotFoundException("Невозможно обновить несуществующий предмет");
         }
-        Item updateItem = itemRepository.getItemById(id);
+        Item updateItem = itemRepository.findById(id);
         long ownerId = updateItem.getOwner().getId();
         if (ownerId != item.getOwner().getId()) {
             throw new NotFoundException("У пользователя с id = " + item.getOwner().getId() + " нет такого предмета");
@@ -121,7 +131,7 @@ public class ItemService {
     }
 
     @Transactional(readOnly = true)
-    public Collection<ItemDto> findItemsByText(String text) {
+    public List<ItemDto> findItemsByText(String text) {
         return itemRepository.findItemsByNameOrDescriptionContainingIgnoreCase(text, text).stream()
                 .filter(Item::getAvailable)
                 .map(ItemMapper::toItemDto)
@@ -145,7 +155,7 @@ public class ItemService {
         List<Booking> bookings = bookingRepository.findFinishedBookingsByItem(itemId, userId, dateTime);
         if (bookings == null || bookings.size() == 0) {
             throw new ValidationException("У пользователя с id = " + userId +
-                    " нет завершенной аренду предмета с id = " + itemId);
+                    " нет завершенной аренды предмета с id = " + itemId);
         }
         Comment comment = CommentMapper.toComment(incomingCommentDto, item, user, dateTime);
         Comment commentStorage = commentRepository.save(comment);

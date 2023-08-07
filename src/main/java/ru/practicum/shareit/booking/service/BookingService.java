@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -88,9 +90,6 @@ public class BookingService {
             throw new NotFoundException("У пользователя с id = " + user.getId() + " не найден такой предмет");
         }
         User booker = booking.getBooker();
-        if (booker == null) {
-            throw new NotFoundException("Арендатор не найден");
-        }
         if (approved) {
             booking.setStatus(Status.APPROVED);
         } else {
@@ -119,11 +118,73 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public List<BookingDto> getBookingByBooker(long bookerId, State state) {
+    public List<BookingDto> getBookingByBooker(long bookerId, State state, Integer from, Integer size) {
         User user = userRepository.findById(bookerId);
         if (user == null) {
             throw new NotFoundException("Пользователь с id = " + bookerId + " не найден");
         }
+        List<Booking> bookings;
+        if (from != null && size != null) {
+            if (from < 0 || size <= 0) {
+                throw new ValidationException("Ошибка в значениях пагинации: from < 0 или size <= 0");
+            }
+            bookings = getBookingByBookerWithPaginated(bookerId, state, from, size);
+        } else {
+            bookings = getBookingByBookerWithoutPaginated(bookerId, state);
+        }
+        return toListBookingDto(bookings);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BookingDto> getBookingByOwner(long ownerId, State state, Integer from, Integer size) {
+        User user = userRepository.findById(ownerId);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id = " + ownerId + " не найден");
+        }
+        List<Booking> bookings;
+        if (from != null && size != null) {
+            if (from < 0 || size <= 0) {
+                throw new ValidationException("Ошибка в значениях пагинации: from < 0 или size <= 0");
+            }
+            bookings = getBookingByOwnerWithPaginated(ownerId, state, from, size);
+        } else {
+            bookings = getBookingByOwnerWithoutPaginated(ownerId, state);
+        }
+        return toListBookingDto(bookings);
+    }
+
+    private List<Booking> getBookingByBookerWithPaginated(long bookerId, State state, Integer from, Integer size) {
+        List<Booking> bookings = new ArrayList<>();
+        Pageable pageable = PageRequest.of(from / size, size);
+
+        switch (state) {
+            case ALL:
+                bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(bookerId, pageable);
+                break;
+            case CURRENT:
+                bookings = bookingRepository.findAllByBookerCurrent(bookerId, LocalDateTime.now(), pageable);
+                break;
+            case PAST:
+                bookings = bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(bookerId,
+                        LocalDateTime.now(), pageable);
+                break;
+            case FUTURE:
+                bookings = bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(bookerId,
+                        LocalDateTime.now(), pageable);
+                break;
+            case WAITING:
+                bookings = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(bookerId, Status.WAITING,
+                        pageable);
+                break;
+            case REJECTED:
+                bookings = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(bookerId, Status.REJECTED,
+                        pageable);
+                break;
+        }
+        return bookings;
+    }
+
+    private List<Booking> getBookingByBookerWithoutPaginated(long bookerId, State state) {
         List<Booking> bookings = new ArrayList<>();
 
         switch (state) {
@@ -147,15 +208,38 @@ public class BookingService {
                 break;
 
         }
-        return toListBookingDto(bookings);
+        return bookings;
     }
 
-    @Transactional(readOnly = true)
-    public List<BookingDto> getBookingByOwner(long ownerId, State state) {
-        User user = userRepository.findById(ownerId);
-        if (user == null) {
-            throw new NotFoundException("Пользователь с id = " + ownerId + " не найден");
+    private List<Booking> getBookingByOwnerWithPaginated(long ownerId, State state, Integer from, Integer size) {
+        List<Booking> bookings = new ArrayList<>();
+        Pageable pageable = PageRequest.of(from / size, size);
+
+        switch (state) {
+            case ALL:
+                bookings = bookingRepository.findAllBookingByOwner(ownerId, pageable);
+                break;
+            case CURRENT:
+                bookings = bookingRepository.findCurrentBookingByOwner(ownerId, LocalDateTime.now(), pageable);
+                break;
+            case PAST:
+                bookings = bookingRepository.findPastBookingByOwner(ownerId, LocalDateTime.now(), pageable);
+                break;
+            case FUTURE:
+                bookings = bookingRepository.findFutureBookingByOwner(ownerId, LocalDateTime.now(), pageable);
+                break;
+            case WAITING:
+                bookings = bookingRepository.findBookingByOwnerIdAndStatus(ownerId, Status.WAITING, pageable);
+                break;
+            case REJECTED:
+                bookings = bookingRepository.findBookingByOwnerIdAndStatus(ownerId, Status.REJECTED, pageable);
+                break;
+
         }
+        return bookings;
+    }
+
+    private List<Booking> getBookingByOwnerWithoutPaginated(long ownerId, State state) {
         List<Booking> bookings = new ArrayList<>();
 
         switch (state) {
@@ -179,7 +263,7 @@ public class BookingService {
                 break;
 
         }
-        return toListBookingDto(bookings);
+        return bookings;
     }
 
     private List<BookingDto> toListBookingDto(List<Booking> bookings) {
