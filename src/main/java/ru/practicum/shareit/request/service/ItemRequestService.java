@@ -9,7 +9,6 @@ import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.IncomingItemRequestDto;
 import ru.practicum.shareit.request.dto.OutItemRequestDto;
@@ -82,7 +81,7 @@ public class ItemRequestService {
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
         /*Теперь в стриме нет обращения к базе*/
-        return  itemRequests.stream()
+        return itemRequests.stream()
                 .map(itemRequest -> ItemRequestMapper.toOutLongItemRequestDto(itemRequest, items))
                 .collect(Collectors.toList());
     }
