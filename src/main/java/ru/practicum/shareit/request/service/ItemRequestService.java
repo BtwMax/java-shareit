@@ -22,6 +22,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -74,17 +75,16 @@ public class ItemRequestService {
             throw new NotFoundException("Пользователь с id = " + requestorId + " не найден");
         }
         List<ItemRequest> itemRequests = requestRepository.findItemRequestByRequestorIdOrderByCreatedDesc(requestorId);
-
-        /*Вроде бы так получается без лишнего n + 1 к базе данных*/
-        return itemRequests.stream()
-                .map(itemRequest -> {
-                    List<Item> items = itemRepository.findItemsByItemRequestId(itemRequest.getId());
-                    List<ItemDto> itemDtos = items.stream()
-                            .map(ItemMapper::toItemDto)
-                            .collect(toList());
-                    return ItemRequestMapper.toOutLongItemRequestDto(itemRequest, itemDtos);
-                })
+        List<Long> requestIds = itemRequests.stream()
+                .map(ItemRequest::getId)
                 .collect(toList());
+        List<ItemDto> items = itemRepository.findByItemRequest_IdIn(requestIds).stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
+        /*Теперь в стриме нет обращения к базе*/
+        return  itemRequests.stream()
+                .map(itemRequest -> ItemRequestMapper.toOutLongItemRequestDto(itemRequest, items))
+                .collect(Collectors.toList());
     }
 
     public List<OutLongItemRequestDto> getAllOtherItemRequest(long requestorId, Integer from, Integer size) {
@@ -102,11 +102,15 @@ public class ItemRequestService {
         } else {
             itemRequests = requestRepository.findAllOtherItemRequest(requestorId);
         }
-        return itemRequests.stream()
-                .map(itemRequest -> ItemRequestMapper.toOutLongItemRequestDto(itemRequest,
-                        itemRepository.findItemsByItemRequestId(itemRequest.getId()).stream()
-                                .map(ItemMapper::toItemDto)
-                                .collect(toList())))
+        List<Long> requestIds = itemRequests.stream()
+                .map(ItemRequest::getId)
                 .collect(toList());
+        List<ItemDto> items = itemRepository.findItemsByItemRequestIdIn(requestIds).stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
+        /*тут тоже поправил*/
+        return itemRequests.stream()
+                .map(itemRequest -> ItemRequestMapper.toOutLongItemRequestDto(itemRequest, items))
+                .collect(Collectors.toList());
     }
 }

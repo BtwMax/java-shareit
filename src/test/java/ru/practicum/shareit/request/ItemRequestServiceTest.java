@@ -26,6 +26,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -164,7 +165,7 @@ public class ItemRequestServiceTest {
                 itemRequestDto, outRequestDto.getCreated()));
         when(requestRepository.findItemRequestByRequestorIdOrderByCreatedDesc(anyLong())).thenReturn(itemRequests);
         List<Item> items = List.of(ItemMapper.toItem(UserMapper.toUser(userDto2), itemDto));
-        when(itemRepository.findItemsByItemRequestId(anyLong())).thenReturn(items);
+        when(itemRepository.findByItemRequest_IdIn(any())).thenReturn(items);
 
         List<OutLongItemRequestDto> actualList = itemRequestService.getRequestorItemRequest(userDto.getId());
         Assertions.assertEquals(actualList.size(), 1);
@@ -197,8 +198,8 @@ public class ItemRequestServiceTest {
         List<ItemRequest> itemRequests = List.of(ItemRequestMapper.toItemRequest(UserMapper.toUser(userDto),
                 itemRequestDto, outRequestDto.getCreated()));
         when(requestRepository.findAllOtherItemRequest(anyLong(), any())).thenReturn(itemRequests);
-        List<Item> items = List.of(ItemMapper.toItem(UserMapper.toUser(userDto2), itemDto));
-        when(itemRepository.findItemsByItemRequestId(anyLong())).thenReturn(items);
+        when(itemRepository.findItemsByItemRequestIdIn(any()))
+                .thenReturn(List.of(ItemMapper.toItem(UserMapper.toUser(userDto2), itemDto)));
 
         List<OutLongItemRequestDto> actualList = itemRequestService.getAllOtherItemRequest(userDto.getId(), 0, 1);
         Assertions.assertEquals(actualList.size(), 1);
@@ -215,7 +216,7 @@ public class ItemRequestServiceTest {
                 itemRequestDto, outRequestDto.getCreated()));
         when(requestRepository.findAllOtherItemRequest(anyLong())).thenReturn(itemRequests);
         List<Item> items = List.of(ItemMapper.toItem(UserMapper.toUser(userDto2), itemDto));
-        when(itemRepository.findItemsByItemRequestId(anyLong())).thenReturn(items);
+        when(itemRepository.findItemsByItemRequestIdIn(any())).thenReturn(items);
 
         List<OutLongItemRequestDto> actualList = itemRequestService.getAllOtherItemRequest(userDto.getId(), null, null);
         Assertions.assertEquals(actualList.size(), 1);
