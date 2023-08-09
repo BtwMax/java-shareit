@@ -10,11 +10,12 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
 @Service
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
@@ -51,7 +52,6 @@ public class UserService {
         return UserMapper.toUserDto(userStorage);
     }
 
-    @Transactional(readOnly = true)
     public UserDto getUserById(long id) {
         User user = userRepository.findById(id);
         if (user == null) {
@@ -65,8 +65,7 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
-    public Collection<UserDto> getAllUsers() {
+    public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());

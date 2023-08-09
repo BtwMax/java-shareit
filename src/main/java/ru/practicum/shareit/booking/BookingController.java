@@ -46,19 +46,23 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> getBookingForBooker(@RequestHeader("X-Sharer-User-Id") long bookerId,
-                                                @RequestParam(defaultValue = "ALL") String state) {
+                                                @RequestParam(defaultValue = "ALL") String state,
+                                                @RequestParam(required = false) Integer from,
+                                                @RequestParam(required = false) Integer size) {
         log.info("Запрос на вывод бронирований для арендатора");
         State bookingState = State.from(state)
                 .orElseThrow(() -> new ServerErrorException("Unknown state: " + state));
-        return bookingService.getBookingByBooker(bookerId, bookingState);
+        return bookingService.getBookingByBooker(bookerId, bookingState, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getBookingForOwner(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                               @RequestParam(defaultValue = "ALL") String state) {
+                                               @RequestParam(defaultValue = "ALL") String state,
+                                               @RequestParam(required = false) Integer from,
+                                               @RequestParam(required = false) Integer size) {
         log.info("Запрос на вывод бронирований для арендодателя");
         State bookingState = State.from(state)
                 .orElseThrow(() -> new ServerErrorException("Unknown state: " + state));
-        return bookingService.getBookingByOwner(ownerId, bookingState);
+        return bookingService.getBookingByOwner(ownerId, bookingState, from, size);
     }
 }

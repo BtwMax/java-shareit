@@ -5,13 +5,22 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
+import java.util.List;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
     Item getItemById(long id);
 
+    Item findById(long id);
+
     Collection<Item> findAllByOwnerIdOrderById(long id);
 
-    Collection<Item> findItemsByNameOrDescriptionContainingIgnoreCase(String name, String description);
+    List<Item> findItemsByNameOrDescriptionContainingIgnoreCase(String name, String description);
+
+    List<Item> findItemsByItemRequestId(long id);
+
+    List<Item> findItemsByItemRequestIdIn(Collection<Long> id);
+
+    List<Item> findByItemRequest_IdIn(Collection<Long> id);
 }

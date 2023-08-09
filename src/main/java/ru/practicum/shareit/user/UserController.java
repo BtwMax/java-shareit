@@ -7,7 +7,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import java.util.List;
 
 
 @RestController
@@ -30,7 +30,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public UserDto getUserById(@PathVariable("id") long id) {
-        log.info("Запрос на показ пользователя в id = " + id);
+        log.info("Запрос на показ пользователя c id = " + id);
         return userService.getUserById(id);
     }
 
@@ -47,7 +47,7 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<UserDto> getAllUsers() {
+    public List<UserDto> getAllUsers() {
         log.info("Текущее количество пользователей: {}", userService.getAllUsers().size());
         return userService.getAllUsers();
     }
