@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 
 
 @RestController
@@ -37,7 +36,7 @@ public class ItemController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<Object> updateItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                              @PathVariable long id, @RequestBody ItemDto itemDto) {
+                                             @PathVariable long id, @RequestBody ItemDto itemDto) {
         log.info("Запрос на изменение предмета с id = " + id);
         return itemClient.updateItem(userId, id, itemDto);
     }
@@ -60,8 +59,8 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> addCommentToItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                                          @PathVariable("itemId") long itemId,
-                                          @Valid @RequestBody IncomingCommentDto incomingCommentDto) {
+                                                   @PathVariable("itemId") long itemId,
+                                                   @Valid @RequestBody IncomingCommentDto incomingCommentDto) {
         log.info("Запрос на добавление комментария к предмету");
         return itemClient.addComment(userId, itemId, incomingCommentDto);
     }

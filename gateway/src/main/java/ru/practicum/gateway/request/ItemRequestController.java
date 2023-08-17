@@ -28,7 +28,7 @@ public class ItemRequestController {
 
     @GetMapping("/{requestId}")
     public ResponseEntity<Object> getRequestById(@RequestHeader("X-Sharer-User-Id") long requestorId,
-                                                @PathVariable("requestId") long requestId) {
+                                                 @PathVariable("requestId") long requestId) {
         log.info("Запрос на показ запроса по заданному id");
         return requestClient.getItemRequestById(requestorId, requestId);
     }
@@ -41,8 +41,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public ResponseEntity<Object> getAllOtherItemRequests(@RequestHeader("X-Sharer-User-Id") long requestorId,
-                                                               @RequestParam(required = false) Integer from,
-                                                               @RequestParam(required = false) Integer size) {
+                                                          @RequestParam(required = false) Integer from,
+                                                          @RequestParam(required = false) Integer size) {
         log.info("Запрос на вывод всех запросов других пользователей");
         return requestClient.getAllOtherItemRequests(requestorId, from, size);
     }
