@@ -20,8 +20,10 @@ public class IncomingBookingDto {
     private long itemId;
 
     @FutureOrPresent
+    @NotNull
     private LocalDateTime start;
 
     @Future
+    @NotNull
     private LocalDateTime end;
 }
