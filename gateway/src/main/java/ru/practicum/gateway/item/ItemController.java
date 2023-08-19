@@ -2,10 +2,12 @@ package ru.practicum.gateway.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Collections;
 
 
 @RestController
@@ -52,7 +54,7 @@ public class ItemController {
                                                  @Valid @RequestParam String text) {
         log.info("Запрос на поиск предметов по тексту в названии или описании");
         if (text == null) {
-            return null;
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
         }
         return itemClient.getItemsByText(userId, text);
     }
